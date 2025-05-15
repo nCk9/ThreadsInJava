@@ -28,18 +28,26 @@ public class SharedQueue {
             throw new QueueSuffocateException("Queue capacity exhausted, wait for consumer to consume messages!");
         }
 
-        rear = (front + size)%qCapacity;
-        sharedQueue.set(rear, payload);
-        size++;
+        synchronized (this) {
+            rear = (front + size) % qCapacity;
+            sharedQueue.set(rear, payload);
+            size++;
+
+        }
     }
 
     Message consume() throws QueueEmptyException {
         if(size == 0){
-            throw new QueueEmptyException("No new messages to consumer, wait for producer to produce messages!");
+            throw new QueueEmptyException("No new messages to consume, wait for producer to produce messages!");
         }
-        Message readMessage = sharedQueue.get(front);
-        front = (front+1)%qCapacity;
-        size--;
+
+        Message readMessage;
+
+        synchronized (this) {
+            readMessage = sharedQueue.get(front);
+            front = (front + 1) % qCapacity;
+            size--;
+        }
         return readMessage;
     }
 
