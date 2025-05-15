@@ -5,10 +5,12 @@ class Counter{
     Counter(){
         count = 0;
     }
+//how synchronized works is:
+    //every object in java has an associated monitor to it. A monitor/mutex is mechanism to control concurrent access to an object.
 
-    public synchronized void incrementCount(){
+    public synchronized void incrementCount(){// the thread calling this objects' methods gets the object's monitor
         count++;
-    }
+    } //that thread releases the monitor of the object which called the method.
 
     public synchronized int getCount(){
         return count;
