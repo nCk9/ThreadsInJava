@@ -7,7 +7,7 @@ public class Producer {
         return ("heyyyyyyyy"+ randInt.toString());
     }
 
-    void produceMessage(SharedQueue sharedQueue, Message payload) throws QueueSuffocateException {
+    void produceMessage(SharedQueue sharedQueue, Message payload) throws QueueSuffocateException, InterruptedException {
         String message  = generateMessage();
         payload.setMessage(message);
         sharedQueue.produce(payload);
