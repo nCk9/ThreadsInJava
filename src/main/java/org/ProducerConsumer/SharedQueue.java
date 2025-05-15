@@ -4,6 +4,7 @@ import com.sun.xml.internal.ws.message.PayloadElementSniffer;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.SyntaxException;
 import sun.lwawt.macosx.CSystemTray;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.util.ArrayList;
 
 public class SharedQueue {
@@ -23,31 +24,28 @@ public class SharedQueue {
         System.out.println("Shared queue size is: " + sharedQueue.size());
     }
 
-    void produce(Message payload) throws QueueSuffocateException {
+    synchronized void produce(Message payload) throws QueueSuffocateException, InterruptedException {
         if(size == qCapacity) {
-            throw new QueueSuffocateException("Queue capacity exhausted, wait for consumer to consume messages!");
+            wait();
+            System.out.println("Queue capacity exhausted, waiting for consumer to consume messages!");
         }
 
-        synchronized (this) {
-            rear = (front + size) % qCapacity;
-            sharedQueue.set(rear, payload);
-            size++;
-
-        }
+        rear = (front + size) % qCapacity;
+        sharedQueue.set(rear, payload);
+        size++;
+        notify();
     }
 
-    Message consume() throws QueueEmptyException {
+    synchronized Message consume() throws QueueEmptyException, InterruptedException {
         if(size == 0){
-            throw new QueueEmptyException("No new messages to consume, wait for producer to produce messages!");
+            wait();
+            System.out.println("No new messages to consume, waiting for producer to produce messages!");
         }
 
-        Message readMessage;
-
-        synchronized (this) {
-            readMessage = sharedQueue.get(front);
+        Message readMessage = sharedQueue.get(front);
             front = (front + 1) % qCapacity;
             size--;
-        }
+        notify();
         return readMessage;
     }
 

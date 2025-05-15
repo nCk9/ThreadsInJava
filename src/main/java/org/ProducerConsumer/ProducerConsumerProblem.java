@@ -20,6 +20,8 @@ public class ProducerConsumerProblem {
                     System.out.println("Message produced successfully!");
                 } catch (QueueSuffocateException e) {
                     System.out.println(e.getMessage());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         };
@@ -32,6 +34,8 @@ public class ProducerConsumerProblem {
                     System.out.println("Message consumed successfully!");
                 } catch (QueueEmptyException e) {
                     System.out.println(e.getMessage());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         };
