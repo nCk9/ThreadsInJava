@@ -25,27 +25,27 @@ public class SharedQueue {
     }
 
     synchronized void produce(Message payload) throws QueueSuffocateException, InterruptedException {
-        if(size == qCapacity) {
-            wait();
+        while(size == qCapacity) {
             System.out.println("Queue capacity exhausted, waiting for consumer to consume messages!");
+            wait();
         }
 
         rear = (front + size) % qCapacity;
         sharedQueue.set(rear, payload);
         size++;
-        notify();
+        notifyAll();
     }
 
     synchronized Message consume() throws QueueEmptyException, InterruptedException {
-        if(size == 0){
-            wait();
+        while(size == 0){
             System.out.println("No new messages to consume, waiting for producer to produce messages!");
+            wait();
         }
 
         Message readMessage = sharedQueue.get(front);
             front = (front + 1) % qCapacity;
             size--;
-        notify();
+        notifyAll();
         return readMessage;
     }
 

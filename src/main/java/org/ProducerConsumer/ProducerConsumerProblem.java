@@ -2,6 +2,7 @@ package org.ProducerConsumer;
 
 import sun.lwawt.macosx.CSystemTray;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ProducerConsumerProblem {
@@ -11,42 +12,27 @@ public class ProducerConsumerProblem {
         System.out.println("Enter the capacity of the shared queue: ");
         Integer size = inputScanner.nextInt();
         SharedQueue sharedQueue = new SharedQueue(size);
-        Producer producer = new Producer();
-        Runnable pr = () -> {
-            for (int i = 0; i < 10; i++) {
-                try {
-                    Message messageBody = new Message();
-                    producer.produceMessage(sharedQueue, messageBody);
-                    System.out.println("Message produced successfully!");
-                } catch (QueueSuffocateException e) {
-                    System.out.println(e.getMessage());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
+        int numberOfProducers = 1;
+        int numberOfConsumers = 5;
+        int messageCount = 10;
+        ArrayList<Thread> producers = new ArrayList<>(numberOfProducers);
+        ArrayList<Thread> consumers = new ArrayList<>(numberOfConsumers);
+        for(int i=0; i<numberOfProducers; i++) {
+            producers.add(new Thread(new Producer(sharedQueue, messageCount)));
+            producers.get(i).start();
+        }
 
-        Runnable con = () -> {
-            Consumer consumer = new Consumer();
-            for (int i = 0; i < 10; i++) {
-                try {
-                    Message message = consumer.consumeMessage(sharedQueue);
-                    System.out.println("Message consumed successfully!");
-                } catch (QueueEmptyException e) {
-                    System.out.println(e.getMessage());
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
+        for(int i=0; i<numberOfConsumers; i++){
+            consumers.add(new Thread(new Consumer(sharedQueue, messageCount)));
+            consumers.get(i).start();
+        }
 
-        Thread producerThread = new Thread(pr);
-        Thread consumerThread = new Thread(con);
-        producerThread.start();
-        consumerThread.start();
+        for(Thread producer: producers)
+            producer.join();
 
-        producerThread.join();
-        consumerThread.join();
+        for(Thread consumer: consumers)
+            consumer.join();
+
         System.out.println("Demonstration done!! thanks!");
         System.out.println("Shared queue size at the end: " + sharedQueue.size);
     }
