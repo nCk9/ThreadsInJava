@@ -35,10 +35,17 @@ public class Synchronization {
                 incrementor.incrementCount();
         };
         Thread t2 = new Thread(run2);
+        Thread t3 = new Thread(()->{
+           for (int i=0; i<1000; i++)
+                incrementor.incrementCount();
+        });
+
         t2.start();
         t1.start();
+        t3.start();
         t1.join();
         t2.join();
+        t3.join();
         System.out.println("Final count = " + incrementor.getCount());
     }
 }
